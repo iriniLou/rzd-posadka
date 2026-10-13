@@ -181,7 +181,10 @@ button { font: inherit; color: inherit; }
 .tk:disabled { cursor: default; }
 
 .half { display: block; transition: transform .7s cubic-bezier(.2,.8,.3,1), opacity .7s; }
-.half.b { position: absolute; inset: 0; }
+.half.b { position: absolute; inset: 0; visibility: hidden; }
+/* линия разрыва включается только когда билет рвётся — иначе на целом билете виден шов */
+.tk.shake .half, .tk.is-torn .half { clip-path: var(--clip); }
+.tk.shake .half.b, .tk.is-torn .half.b { visibility: visible; }
 
 .face {
   display: grid; grid-template-columns: 58px minmax(0, 1fr) 44px;

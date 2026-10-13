@@ -194,7 +194,10 @@ button { font: inherit; color: inherit; }
 .tk:disabled { cursor: default; }
 
 .half { display: block; transition: transform .7s cubic-bezier(.2,.8,.3,1), opacity .7s; }
-.half.b { position: absolute; inset: 0; }
+.half.b { position: absolute; inset: 0; visibility: hidden; }
+/* линия разрыва включается только когда билет рвётся — иначе на целом билете виден шов */
+.tk.shake .half, .tk.is-torn .half { clip-path: var(--clip); }
+.tk.shake .half.b, .tk.is-torn .half.b { visibility: visible; }
 
 .face {
   display: grid; grid-template-columns: 58px minmax(0, 1fr) 44px;
@@ -526,7 +529,7 @@ window.QUIZ = {
       ok: false, note: "Самая низкая температура на Транссибе — около −62 градусов." },
 
     { text: "Первая железная дорога в России была грузовой",
-      ok: true,  note: "Её построили отец и сын Черепановы на Урале — по ней возили руду." },
+      ok: true,  note: "Первая пассажирская железная дорога была проложена между Санкт-Петербургом и Царским Селом." },
 
     { text: "Транссибирская магистраль соединяет Калининград и Владивосток",
       ok: false, note: "Транссибирская магистраль соединяет Москву и Владивосток." },
@@ -731,11 +734,11 @@ window.QUIZ = {
       btn.setAttribute("aria-label", "Билет: " + fact.text);
       const [ca, cb] = tearPaths(), bars = barcode();
 
-      const a = document.createElement("span"); a.className = "half a"; a.style.clipPath = ca; a.style.position = "relative";
+      const a = document.createElement("span"); a.className = "half a"; a.style.setProperty("--clip", ca); a.style.position = "relative";
       a.appendChild(makeFace(fact, idx + 1, bars));
       const bad = document.createElement("span"); bad.className = "stamp bad"; bad.textContent = "Ложь";
       a.appendChild(bad);
-      const b = document.createElement("span"); b.className = "half b"; b.style.clipPath = cb; b.setAttribute("aria-hidden", "true");
+      const b = document.createElement("span"); b.className = "half b"; b.style.setProperty("--clip", cb); b.setAttribute("aria-hidden", "true");
       b.appendChild(makeFace(fact, idx + 1, bars));
       const ok = document.createElement("span"); ok.className = "stamp ok"; ok.textContent = "Верно";
 

@@ -165,11 +165,11 @@
       btn.setAttribute("aria-label", "Билет: " + fact.text);
       const [ca, cb] = tearPaths(), bars = barcode();
 
-      const a = document.createElement("span"); a.className = "half a"; a.style.clipPath = ca; a.style.position = "relative";
+      const a = document.createElement("span"); a.className = "half a"; a.style.setProperty("--clip", ca); a.style.position = "relative";
       a.appendChild(makeFace(fact, idx + 1, bars));
       const bad = document.createElement("span"); bad.className = "stamp bad"; bad.textContent = "Ложь";
       a.appendChild(bad);
-      const b = document.createElement("span"); b.className = "half b"; b.style.clipPath = cb; b.setAttribute("aria-hidden", "true");
+      const b = document.createElement("span"); b.className = "half b"; b.style.setProperty("--clip", cb); b.setAttribute("aria-hidden", "true");
       b.appendChild(makeFace(fact, idx + 1, bars));
       const ok = document.createElement("span"); ok.className = "stamp ok"; ok.textContent = "Верно";
 
