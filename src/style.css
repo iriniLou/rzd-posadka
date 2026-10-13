@@ -61,7 +61,7 @@ button { font: inherit; color: inherit; }
 }
 .counter-label { font-size: 11px; line-height: 1.1; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
 .counter-val { font-size: clamp(22px, 2vw, 32px); font-weight: 700; text-shadow: 0 0 10px #ffb51f88; }
-.counter-val i { font-style: normal; opacity: .5; margin: 0 2px; }
+.caption[hidden], .cap-step[hidden] { display: none; }
 .counter.bump .counter-val { animation: bump .5s; }
 @keyframes bump { 40% { transform: scale(1.35); } }
 
@@ -368,7 +368,7 @@ button { font: inherit; color: inherit; }
   .start-card { gap: 14px; }
   .task { display: none; }
   .tickets { overflow: visible; }
-  .counter-label { display: none; }
+  .counter-label { font-size: 9px; }
   .top { gap: 10px; }
   .logo { display: none; }
   .route { height: 46px; }

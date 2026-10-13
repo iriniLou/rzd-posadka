@@ -85,9 +85,11 @@
       if (j === i) { img.classList.remove("on"); void img.offsetWidth; img.classList.add("on"); }
       else img.classList.remove("on");
     });
-    const cap = $(".caption");
-    $("#capText").textContent = Q.captions[i] || "";
-    $("#capStep").textContent = i === 0 ? "Старт" : i === LAST ? "Финиш" : "Кадр " + (i + 1);
+    const cap = $(".caption"), capText = Q.captions[i] || "";
+    $("#capText").textContent = capText;
+    $("#capStep").textContent = "Старт";
+    $("#capStep").hidden = i !== 0;
+    cap.hidden = !capText;
     cap.classList.remove("swap"); void cap.offsetWidth; cap.classList.add("swap");
 
     const pct = (i / LAST) * 100;
@@ -234,7 +236,10 @@
       { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 70}px) scale(.55) rotate(-10deg)`, opacity: 0.95, offset: 0.45 },
       { transform: `translate(${dx}px, ${dy}px) scale(.08) rotate(-24deg)`, opacity: 0.2 }
     ], { duration: 750, easing: "cubic-bezier(.4,0,.6,1)" });
-    anim.onfinish = () => { f.remove(); done(); };
+    let fired = false;
+    const end = () => { if (fired) return; fired = true; f.remove(); done(); };
+    anim.onfinish = end;
+    setTimeout(end, 1100);   // страховка, если анимация не доиграет (свёрнутое окно и т.п.)
   }
 
   /* ───────── Финал ───────── */
@@ -288,7 +293,6 @@
   /* ───────── Запуск ───────── */
   $("#title").textContent = Q.title;
   $("#task").textContent = Q.task;
-  $("#total").textContent = TOTAL;
   $("#startTitle").textContent = Q.title;
   $("#startTask").textContent = Q.task;
   $("#final").classList.add("hide");
