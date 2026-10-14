@@ -216,7 +216,10 @@
     c.classList.remove("bump"); void c.offsetWidth; c.classList.add("bump");
 
     const last = found >= TOTAL;
-    if (last) finished = true;        // больше ничего не нажимается, финал запускается один раз
+    if (last) {
+      finished = true;                // больше ничего не нажимается, финал запускается один раз
+      playAnnounce();                 // звук запускаем прямо по нажатию — иначе браузер может его заблокировать
+    }
     flyToScene(btn, () => {
       setFrame(frameFor(found), true);
       if (last) finish();
@@ -247,9 +250,34 @@
     return [...document.querySelectorAll(".slot")].filter((li) => !li._fact.ok && !li._btn.disabled);
   }
 
-  function finish() {
+  /* Объявление на вокзале: обычный <audio>, а если браузер не дал его включить — через Web Audio */
+  let announceBuf = null;
+  function loadAnnounce() {
+    const a = ctx(); if (!a || announceBuf || !window.fetch) return;
+    fetch($("#announce").src).then((r) => r.arrayBuffer())
+      .then((b) => new Promise((ok, no) => a.decodeAudioData(b, ok, no)))
+      .then((buf) => { announceBuf = buf; }).catch(() => {});
+  }
+  let announceNode = null;
+  function playAnnounce() {
+    if (!soundOn) return;
     const au = $("#announce");
-    if (soundOn) { au.currentTime = 0; const p = au.play(); if (p && p.catch) p.catch(() => {}); }
+    au.muted = false; au.volume = 1; au.currentTime = 0;
+    const viaWebAudio = () => {
+      const a = ctx(); if (!a || !announceBuf) return;
+      announceNode = a.createBufferSource(); announceNode.buffer = announceBuf;
+      announceNode.connect(a.destination); announceNode.start();
+    };
+    let p;
+    try { p = au.play(); } catch (e) { viaWebAudio(); return; }
+    if (p && p.catch) p.catch(viaWebAudio);
+  }
+  function stopAnnounce() {
+    const au = $("#announce"); au.pause(); au.currentTime = 0;
+    if (announceNode) { try { announceNode.stop(); } catch (e) {} announceNode = null; }
+  }
+
+  function finish() {
     setTimeout(() => {
       const fin = $("#final");
       fin.classList.remove("hide"); fin.setAttribute("aria-hidden", "false");
@@ -283,7 +311,7 @@
 
   function reset() {
     closeFinal();
-    const au = $("#announce"); au.pause(); au.currentTime = 0;
+    stopAnnounce();
     found = 0; finished = false;
     $("#cnt").textContent = "0";
     buildTickets();
@@ -302,11 +330,8 @@
   flipBoard($("#startBoard"), "Посадка открыта");
 
   $("#goBtn").addEventListener("click", () => {
-    ctx();
-    // «Разблокируем» аудио на iOS/Safari тихим запуском — сам звук прозвучит только в финале
-    const au = $("#announce"); au.muted = true;
-    const p = au.play(); if (p && p.then) p.then(() => { au.pause(); au.currentTime = 0; au.muted = false; }).catch(() => { au.muted = false; });
-    else { au.pause(); au.muted = false; }
+    ctx();            // включаем звук страницы по нажатию (требование браузеров)
+    loadAnnounce();   // заранее готовим запасной вариант воспроизведения
     $("#start").classList.add("hide");
   });
   $("#againBtn").addEventListener("click", reset);
@@ -317,6 +342,6 @@
   $("#soundBtn").addEventListener("click", (e) => {
     soundOn = !soundOn;
     e.currentTarget.setAttribute("aria-pressed", String(soundOn));
-    if (!soundOn) $("#announce").pause();
+    if (!soundOn) stopAnnounce();
   });
 })();
